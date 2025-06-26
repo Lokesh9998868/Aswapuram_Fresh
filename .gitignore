@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+!venv/Lib/site-packages
+!venv/Scripts/activate
+!venv/bin/activate
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.coverage.*
+.hypothesis/
+.pytest_cache/
+cover/
+htmlcov/
+.nox/
+.idea/ # If you use PyCharm or IntelliJ
+*.log
+*.sqlite3
+*.db
+.env
+.flaskenv
