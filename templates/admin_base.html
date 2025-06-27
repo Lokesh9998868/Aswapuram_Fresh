@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Panel{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col p-4">
+    <div class="container mx-auto bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl w-full">
+        <h1 class="text-3xl font-extrabold text-green-700 mb-6 text-center">Aswapuram Fresh Admin</h1>
+
+        {# Flash Messages #}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="list-none p-0 mb-4">
+                    {% for category, message in messages %}
+                        <li class="p-3 mb-2 rounded-md {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% elif category == 'warning' %}bg-yellow-100 text-yellow-700{% else %}bg-blue-100 text-blue-700{% endif %} border border-{{ category }}-400">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <nav class="mb-6 border-b pb-4 flex justify-between items-center">
+            <div>
+                <a href="{{ url_for('admin_dashboard') }}" class="text-blue-600 hover:text-blue-800 font-medium mr-4">Dashboard</a>
+                <a href="{{ url_for('admin_products') }}" class="text-blue-600 hover:text-blue-800 font-medium mr-4">Manage Products</a>
+                <a href="{{ url_for('admin_orders') }}" class="text-blue-600 hover:text-blue-800 font-medium">View Orders</a>
+            </div>
+            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">Logout</a>
+        </nav>
+
+        <div class="content">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+</body>
+</html>
