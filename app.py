@@ -82,6 +82,28 @@ def login():
     # Render the login page, passing the error message (if any) and the attempted email
     return render_template('login.html', error=error, email=email_attempt)
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """
+    Handles user registration, saving new users to the database.
+    """
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        name = request.form['name']
+        address = request.form.get('address', '')
+        is_admin = request.form.get('is_admin') == 'on' # Checkbox value from form
+
+        if User.query.filter_by(email=email).first():
+            return "Email already registered", 409 # Conflict
+
+        # IMPORTANT: Hash the password before saving in a real application!
+        new_user = User(email=email, password=password, name=name, address=address, is_admin=is_admin)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
 # ... (rest of your app.py routes and code) ...
 @app.route('/logout')
 def logout():
@@ -243,6 +265,7 @@ def update_order_status(order_id):
     if order:
         order["status"] = "Delivered" # Simple status update
     return redirect(url_for('admin_orders'))
+
 
 # To run this Flask app, make sure your virtual environment is activated in your terminal.
 # Then, set the FLASK_APP environment variable and run Flask:
