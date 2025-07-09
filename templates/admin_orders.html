@@ -3,76 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Order Management - Aswapuram Fresh</title>
+    <title>Aswapuram Fresh - Admin Orders</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-    </style>
+    <style>body { font-family: 'Inter', sans-serif; }</style>
 </head>
-<body class="bg-gray-100 min-h-screen p-4">
-    <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-800">Admin Order Management</h1>
-            <a href="{{ url_for('homepage') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Back to Home</a>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
+    <div class="container mx-auto bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl w-full">
+        <h1 class="text-3xl font-extrabold text-green-700 mb-6 text-center">Admin Panel - All Orders</h1>
+        <div class="flex justify-end mb-4">
+            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">Logout</a>
         </div>
 
-        <h2 class="text-2xl font-semibold mb-4 text-gray-700">All Customer Orders</h2>
-
+        {# This is the loop that the error often points to if 'orders' is not iterable #}
         {% if orders %}
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-200 rounded-lg shadow-sm">
-                    <thead>
-                        <tr class="bg-gray-100 text-gray-600 uppercase text-sm leading-normal">
-                            <th class="py-3 px-6 text-left">Order ID</th>
-                            <th class="py-3 px-6 text-left">Customer</th>
-                            <th class="py-3 px-6 text-left">Order Date</th>
-                            <th class="py-3 px-6 text-right">Total Amount</th>
-                            <th class="py-3 px-6 text-left">Items</th>
-                            <th class="py-3 px-6 text-left">Status</th>
-                            <th class="py-3 px-6 text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-gray-700 text-sm">
-                        {% for order in orders %}
-                            <tr class="border-b border-gray-200 hover:bg-gray-50">
-                                <td class="py-3 px-6 text-left whitespace-nowrap">{{ order.id }}</td>
-                                <td class="py-3 px-6 text-left">{{ order.customer.name }} ({{ order.customer.email }})</td>
-                                <td class="py-3 px-6 text-left">{{ order.order_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                                <td class="py-3 px-6 text-right font-semibold">${{ "%.2f"|format(order.total_amount) }}</td>
-                                <td class="py-3 px-6 text-left">
-                                    <ul class="list-disc list-inside">
-                                        {% for item in order.items %}
-                                            <li>{{ item.product.name }} (x{{ item.quantity }}) @ ${{ "%.2f"|format(item.price_at_order) }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                </td>
-                                <td class="py-3 px-6 text-left">
-                                    <span class="px-2 py-1 rounded-full text-xs font-semibold
-                                        {% if order.status == 'Pending' %} bg-yellow-200 text-yellow-800
-                                        {% elif order.status == 'Delivered' %} bg-green-200 text-green-800
-                                        {% else %} bg-gray-200 text-gray-800 {% endif %}">
-                                        {{ order.status }}
-                                    </span>
-                                </td>
-                                <td class="py-3 px-6 text-center">
-                                    {% if order.status == 'Pending' %}
-                                    <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="POST" class="inline-block">
-                                        <button type="submit"
-                                                class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-1 px-3 rounded-md text-xs transition duration-150 ease-in-out">
-                                            Mark as Delivered
-                                        </button>
-                                    </form>
-                                    {% else %}
-                                        <span class="text-gray-400 text-xs">No action</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <div class="space-y-6">
+                {% for order in orders %}
+                    <div class="bg-gray-50 rounded-xl shadow-md p-5 border border-gray-200">
+                        <div class="flex justify-between items-center mb-3">
+                            <h2 class="text-xl font-bold text-gray-800">Order ID: {{ order.id }}</h2>
+                            <span class="px-3 py-1 rounded-full text-sm font-semibold {{ 'bg-yellow-200 text-yellow-800' if order.status == 'Pending' else 'bg-green-200 text-green-800' }}">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                        <p class="text-gray-700 mb-2"><strong>Customer:</strong> {{ order.user_name }} ({{ order.user_email }})</p>
+                        <p class="text-gray-700 mb-2"><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+                        <p class="text-gray-700 mb-2"><strong>Total Amount:</strong> ₹{{ "%.2f" | format(order.total_amount) }}</p>
+                        <p class="text-gray-700 mb-4"><strong>Date:</strong> {{ order.date }}</p>
+
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Items:</h3>
+                        {# This is the nested loop that is also a common culprit #}
+                        <ul class="list-disc list-inside space-y-1 pl-4">
+                            {% for item in order.items %}
+                                <li class="text-gray-600">{{ item.name }} x {{ item.quantity }} (₹{{ "%.2f" | format(item.price) }} / {{ item.unit }})</li>
+                            {% endfor %}
+                        </ul>
+
+                        {% if order.status == 'Pending' %}
+                            <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="post" class="mt-4">
+                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                                    Mark as Delivered
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                {% endfor %}
             </div>
         {% else %}
-            <p class="text-gray-600 text-center text-lg py-8">No orders have been placed yet.</p>
+            <p class="text-center text-gray-600">No orders received yet.</p>
         {% endif %}
     </div>
 </body>

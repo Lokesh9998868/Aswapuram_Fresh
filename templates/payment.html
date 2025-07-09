@@ -31,7 +31,7 @@
                                 <tr class="border-b border-gray-200 last:border-b-0">
                                     <td class="py-3 px-6 text-left">{{ item.name }}</td>
                                     <td class="py-3 px-6 text-center">{{ item.quantity }}</td>
-                                    <td class="py-3 px-6 text-right">${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                                    <td class="py-3 px-6 text-right">₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -39,7 +39,7 @@
                 </div>
                 <div class="flex justify-between items-center bg-green-50 p-4 rounded-md font-bold text-lg text-gray-800">
                     <span>Total Amount:</span>
-                    <span class="text-green-700 text-2xl">${{ "%.2f"|format(total_price) }}</span>
+                    <span class="text-green-700 text-2xl">₹{{ "%.2f"|format(total_price) }}</span>
                 </div>
             </div>
 

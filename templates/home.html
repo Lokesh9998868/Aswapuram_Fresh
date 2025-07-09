@@ -19,16 +19,23 @@
                     Welcome to Aswapuram Fresh!
                 {% endif %}
             </h1>
-            <div>
+            <div class="flex space-x-2">
                 {% if session.logged_in %}
-                    <a href="{{ url_for('view_cart') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md mr-2 transition duration-150 ease-in-out">View Cart</a>
+                    <a href="{{ url_for('view_cart') }}" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out relative">
+                        <span>View Cart</span>
+                        {% if cart_item_count > 0 %}
+                            <span class="ml-0.5 px-2 py-0.5 bg-red-600 text-white text-xs font-bold rounded-full">
+                                {{ cart_item_count }}
+                            </span>
+                        {% endif %}
+                    </a>
                     {% if session.is_admin %}
-                        <a href="{{ url_for('admin_orders') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md mr-2 transition duration-150 ease-in-out">Admin Orders</a>
+                        <a href="{{ url_for('admin_orders') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Admin Orders</a>
                     {% endif %}
                     <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Logout</a>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Login</a>
-                    <a href="{{ url_for('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md ml-2 transition duration-150 ease-in-out">Register</a>
+                    <a href="{{ url_for('register') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Register</a>
                 {% endif %}
             </div>
         </div>
@@ -40,13 +47,11 @@
                     <div>
                         <img src="https://placehold.co/200x150/E0E0E0/333333?text={{ product.name | replace(' ', '+') }}" alt="{{ product.name }}" class="w-full h-32 object-cover rounded-md mb-4">
                         <h3 class="text-xl font-bold text-gray-900 mb-2">{{ product.name }}</h3>
-                        <p class="text-gray-600 text-sm mb-2">{{ product.description }}</p>
-                        <p class="text-lg font-semibold text-green-600 mb-2">${{ "%.2f"|format(product.price) }} / {{ product.unit }}</p>
-                        <p class="text-sm text-gray-500 mb-4">Stock: {{ product.stock }}</p>
+                        <p class="text-lg font-semibold text-green-600 mb-2">₹{{ "%.2f"|format(product.price) }} / {{ product.unit }}</p>
                     </div>
                     <form action="{{ url_for('add_to_cart') }}" method="POST" class="flex items-center mt-auto">
                         <input type="hidden" name="product_id" value="{{ product.id }}">
-                        <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}"
+                        <input type="number" name="quantity" value="1" min="1"
                                class="w-20 p-2 border border-gray-300 rounded-md mr-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <button type="submit"
                                 class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md focus:outline-none focus:shadow-outline transition duration-150 ease-in-out">

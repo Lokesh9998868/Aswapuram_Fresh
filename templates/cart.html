@@ -34,9 +34,28 @@
                                     <img src="https://placehold.co/50x50/E0E0E0/333333?text={{ item.name | replace(' ', '+') }}" alt="{{ item.name }}" class="w-12 h-12 object-cover rounded-md mr-3">
                                     <span>{{ item.name }}</span>
                                 </td>
-                                <td class="py-3 px-6 text-center">${{ "%.2f"|format(item.price) }}</td>
-                                <td class="py-3 px-6 text-center">{{ item.quantity }}</td>
-                                <td class="py-3 px-6 text-right font-semibold">${{ "%.2f"|format(item.price * item.quantity) }}</td>
+                                <td class="py-3 px-6 text-center">₹{{ "%.2f"|format(item.price) }}</td>
+                                <td class="py-3 px-6 text-center"> {# MODIFIED: Removed flex, items-center, justify-center from TD #}
+    <div class="inline-flex items-center"> {# ADDED: New wrapper div with inline-flex to center its content #}
+        <form action="{{ url_for('update_cart_quantity') }}" method="post" class="inline-flex">
+            <input type="hidden" name="product_id" value="{{ item.id }}">
+            <input type="hidden" name="action" value="decrease">
+            <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded-l-md transition duration-150 ease-in-out">
+                -
+            </button>
+        </form>
+        <span class="px-3 py-1 border-t border-b border-gray-200 text-gray-800 font-semibold">{{ item.quantity }}</span>
+        <form action="{{ url_for('update_cart_quantity') }}" method="post" class="inline-flex">
+            <input type="hidden" name="product_id" value="{{ item.id }}">
+            <input type="hidden" name="action" value="increase">
+            <button type="submit" class="bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold py-1 px-2 rounded-r-md transition duration-150 ease-in-out">
+                +
+            </button>
+        </form>
+        <span class="ml-2 text-gray-600 text-sm">{{ item.unit }}</span>
+    </div>
+</td>
+                                <td class="py-3 px-6 text-right font-semibold">₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
                             </tr>
                         {% endfor %}
                     </tbody>
@@ -45,7 +64,7 @@
 
             <div class="flex justify-end items-center mt-6 p-4 bg-gray-50 rounded-md shadow-inner">
                 <h2 class="text-2xl font-bold text-gray-800 mr-4">Total:</h2>
-                <span class="text-3xl font-extrabold text-green-700">${{ "%.2f"|format(total_price) }}</span>
+                <span class="text-3xl font-extrabold text-green-700">₹{{ "%.2f"|format(total_price) }}</span>
             </div>
 
             <div class="flex justify-end mt-6">
