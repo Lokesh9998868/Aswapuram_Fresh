@@ -3,6 +3,7 @@ import uuid # For generating unique IDs for products and orders
 from flask_sqlalchemy import SQLAlchemy # Corrected: SQLAlchemy (no extra 'A')
 from datetime import datetime # to get current date for orders
 from functools import wraps # For creating decorators
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -13,6 +14,11 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://flaskuser:lokesh9@localhost:5432/aswapuram_fresh_db' # Corrected: Removed misleading MySQL comment
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'lokesh123'
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("postgresql://aswapuram_fresh_db_user:gsUgYkR3EhW6DeQKswS8ptGjjbtslwt1@dpg-d1t4osh5pdvs73d70vpg-a.oregon-postgres.render.com/aswapuram_fresh_db")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 
 # Initialize the database
 db = SQLAlchemy(app)
