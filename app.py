@@ -1,4 +1,5 @@
 import os # For file path handling
+import logging
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import uuid # For generating unique IDs for products and orders
 from flask_sqlalchemy import SQLAlchemy # Corrected: SQLAlchemy (no extra 'A')
@@ -11,7 +12,7 @@ import re # For UPI ID validation
 from urllib.parse import quote_plus
 from uuid import uuid4
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user,
-import logging
+
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -42,10 +43,20 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("postgresql://aswapuram_fresh_db_user:gsUgYkR3EhW6DeQKswS8ptGjjbtslwt1@dpg-d1t4osh5pdvs73d70vpg-a.oregon-postgres.render.com/aswapuram_fresh_db")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
->>>>>>> 5d2a046c4e16e33833574d9d56a1f90287ba4a6b
 
 # Initialize the database
 db = SQLAlchemy(app)
+
+from models import User, Product, Order, OrderItem, Transaction
+
+@app.before_first_request
+def create_tables():
+    logging.info("Attempting to create database tables...")
+    try:
+        db.create_all() # This creates all tables defined in your models if they don't exist
+        logging.info("Database tables created successfully (if they didn't exist).")
+    except Exception as e:
+        logging.error(f"Error creating database tables: {e}", exc_info=True)
 
 
 # --- Flask-Login Setup --- # ADD THIS SECTION
