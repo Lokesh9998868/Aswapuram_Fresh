@@ -11,7 +11,7 @@ from wtforms.validators import DataRequired, Length, ValidationError
 import re # For UPI ID validation
 from urllib.parse import quote_plus
 from uuid import uuid4
-from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user,
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 
 
 
