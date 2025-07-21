@@ -26,9 +26,27 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')# Corrected: Removed misleading MySQL comment
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = os.environ.get(SECRET_KEY, 'default_secret_key_for_dev')
+import os
+
+# Initialize Flask app
+app = Flask(__name__)
+
+# --- Database Configuration for PostgreSQL ---
+# IMPORTANT: Replace 'lokesh9' with your actual password if it's different
+# Make sure your PostgreSQL server is running and the database 'aswapuram_fresh_db' exists
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://flaskuser:lokesh9@localhost:5432/aswapuram_fresh_db' # Corrected: Removed misleading MySQL comment
+#app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+#app.secret_key = 'lokesh123'
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("postgresql://aswapuram_fresh_db_user:gsUgYkR3EhW6DeQKswS8ptGjjbtslwt1@dpg-d1t4osh5pdvs73d70vpg-a.oregon-postgres.render.com/aswapuram_fresh_db")
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+>>>>>>> 5d2a046c4e16e33833574d9d56a1f90287ba4a6b
 
 # Initialize the database
 db = SQLAlchemy(app)
+
 
 # --- Flask-Login Setup --- # ADD THIS SECTION
 login_manager = LoginManager()
@@ -39,6 +57,8 @@ login_manager.login_message_category = 'warning'
 
 # --- Database Models ---
 class User(db.Model, UserMixin):
+# --- Database Models ---
+class User(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
@@ -166,7 +186,9 @@ def login():
 
         # CORRECTED: Access password via .password attribute (not dictionary key)
         if user_data and user_data.password == password:
+
             login_user(user_data) 
+            session['logged_in'] = True
             session['email'] = user_data.email
             session['username'] = user_data.name
             session['is_admin'] = user_data.is_admin
@@ -295,6 +317,45 @@ def update_cart_quantity():
             flash(f"Quantity for {cart[product_id]['name']} updated.", 'success')
     else:
         flash('Product not found in cart.', 'danger')
+
+    session['cart'] = cart
+    
+    # Recalculate and update cart_item_count for the homepage badge
+    cart_item_count = sum(item['quantity'] for item in cart.values())
+    session['cart_item_count'] = cart_item_count
+
+    return redirect(url_for('view_cart')) # Redirect back to the cart page
+
+@app.route('/checkout')
+def checkout():
+    if not session.get('logged_in'):
+        flash('Please login to update your cart.', 'warning')
+        return redirect(url_for('login'))
+
+    product_id = request.form.get('product_id')
+    action = request.form.get('action') # 'increase' or 'decrease'
+
+    cart = session.get('cart', {})
+
+    if product_id in cart:
+        if action == 'increase':
+            cart[product_id]['quantity'] += 1
+        elif action == 'decrease':
+            cart[product_id]['quantity'] -= 1
+
+        # Ensure quantity doesn't go below 1
+        if cart[product_id]['quantity'] < 1:
+            del cart[product_id] # Remove item if quantity drops to 0 or less
+            flash('Product removed from cart.', 'info')
+        else:
+            flash(f"Quantity for {cart[product_id]['name']} updated.", 'success')
+    else:
+        flash('Product not found in cart.', 'danger')
+    cart_items = list(cart.values())
+    total_price = sum(item['price'] * item['quantity'] for item in cart_items)
+    # CORRECTED: Fetch user address from database using User model (not 'users')
+    user = User.query.filter_by(email=session.get('email')).first()
+    user_address = user.address if user else 'No address found. Please update your profile.'
 
     session['cart'] = cart
     
@@ -682,6 +743,8 @@ def initiate_upi_payment():
         logging.error(f"Error initiating UPI payment for Order ID {order_to_pay.id}: {e}", exc_info=True) # Added more robust error logging
         flash(f'Error processing UPI payment: {e}', 'danger')
         return redirect(url_for('checkout_payment', order_id=order_to_pay.id)) # Redirect back to payment with error
+
+# ... (keep all your existing routes and code below this)
 
 # ... (keep all your existing routes and code below this)
 
