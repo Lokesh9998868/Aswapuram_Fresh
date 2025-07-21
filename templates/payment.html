@@ -14,7 +14,6 @@
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Checkout</h1>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <!-- Order Summary -->
             <div>
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Order Summary</h2>
                 <div class="border border-gray-200 rounded-lg overflow-hidden mb-4">
@@ -29,9 +28,9 @@
                         <tbody class="text-gray-700 text-sm">
                             {% for item in cart_items %}
                                 <tr class="border-b border-gray-200 last:border-b-0">
-                                    <td class="py-3 px-6 text-left">{{ item.name }}</td>
+                                    <td class="py-3 px-6 text-left">{{ item.product_name }}</td> {# Access product_name from OrderItem #}
                                     <td class="py-3 px-6 text-center">{{ item.quantity }}</td>
-                                    <td class="py-3 px-6 text-right">₹{{ "%.2f"|format(item.price * item.quantity) }}</td>
+                                    <td class="py-3 px-6 text-right">₹{{ "%.2f"|format(item.product_price_at_order * item.quantity) }}</td> {# Access product_price_at_order from OrderItem #}
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -43,10 +42,13 @@
                 </div>
             </div>
 
-            <!-- Delivery and Payment -->
             <div>
                 <h2 class="text-2xl font-semibold text-gray-700 mb-4">Delivery & Payment</h2>
-                <form action="{{ url_for('place_order') }}" method="POST">
+
+                {# Form for Delivery Address and Payment Method Selection #}
+                <form id="checkoutForm" action="{{ url_for('place_order') }}" method="POST">
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+
                     <div class="mb-6">
                         <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Delivery Address:</label>
                         <textarea id="address" name="address" rows="4" required
@@ -57,29 +59,84 @@
                         <label class="block text-gray-700 text-sm font-bold mb-2">Payment Method:</label>
                         <div class="mt-2">
                             <label class="inline-flex items-center">
-                                <input type="radio" class="form-radio text-green-600" name="payment_method" value="cod" checked>
+                                <input type="radio" class="form-radio text-green-600" name="payment_method" value="cod"
+                                    id="payment_cod" {% if order.payment_method == 'cod' or not order.payment_method %}checked{% endif %}>
                                 <span class="ml-2 text-gray-700">Cash on Delivery (COD)</span>
                             </label>
-                            <!-- You can add more payment options here later -->
-                            <!--
+
                             <label class="inline-flex items-center ml-6">
-                                <input type="radio" class="form-radio text-green-600" name="payment_method" value="card" disabled>
-                                <span class="ml-2 text-gray-700">Credit/Debit Card (Coming Soon)</span>
+                                <input type="radio" class="form-radio text-green-600" name="payment_method" value="upi"
+                                    id="payment_upi" {% if order.payment_method == 'upi' %}checked{% endif %}>
+                                <span class="ml-2 text-gray-700">UPI (PhonePe, GPay, etc.)</span>
                             </label>
-                            -->
                         </div>
                     </div>
 
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center mt-6">
                         <a href="{{ url_for('view_cart') }}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Back to Cart</a>
-                        <button type="submit"
+                        {# This button is for COD, or to reveal UPI details #}
+                        <button type="submit" id="mainSubmitButton"
                                 class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-md text-lg transition duration-150 ease-in-out shadow-lg">
-                            Place Order
+                            Place Order (COD)
                         </button>
                     </div>
                 </form>
+
+                {# Separate Form for UPI Payment - this will be hidden/shown by JS #}
+                <form id="upiPaymentForm" action="{{ url_for('initiate_upi_payment') }}" method="POST"
+                      class="mt-8 p-4 border border-blue-200 rounded-lg bg-blue-50"
+                      style="{% if form.upi_id.errors or (order.payment_method == 'upi' and not (form.upi_id.data is none)) %}display:block;{% else %}display:none;{% endif %}">
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">UPI Details</h3>
+                    {{ form.csrf_token }} {# Keep this for Flask-WTF forms #}
+                    <input type="hidden" name="order_id" value="{{ order.id }}"> {# Pass order_id to UPI initiation #}
+
+                    <div class="mb-4">
+                        {{ form.upi_id.label(class="block text-gray-700 text-sm font-bold mb-2") }}
+                        {{ form.upi_id(class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", placeholder="yourname@bank") }}
+                        {% if form.upi_id.errors %}
+                            <p class="text-red-500 text-xs italic mt-2">
+                                {% for error in form.upi_id.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </p>
+                        {% endif %}
+                    </div>
+
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-md text-lg transition duration-150 ease-in-out shadow-lg">
+                        Proceed to UPI App
+                    </button>
+                </form>
             </div>
-        </div>
-    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+            const mainSubmitButton = document.getElementById('mainSubmitButton');
+            const upiPaymentForm = document.getElementById('upiPaymentForm');
+            const upiIdInput = document.getElementById('upi_id');
+
+            function toggleFormsAndButton() {
+                const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
+
+                if (selectedMethod === 'cod') {
+                    upiPaymentForm.style.display = 'none'; // Hide UPI form
+                    mainSubmitButton.style.display = 'inline-block'; // Show main button
+                    mainSubmitButton.textContent = 'Place Order (COD)';
+                    upiIdInput.removeAttribute('required'); // No need for UPI ID
+                } else if (selectedMethod === 'upi') {
+                    upiPaymentForm.style.display = 'block'; // Show UPI form
+                    mainSubmitButton.style.display = 'none'; // Hide main button
+                    upiIdInput.setAttribute('required', 'required'); // Make UPI ID required
+                }
+            }
+
+            paymentMethodRadios.forEach(radio => {
+                radio.addEventListener('change', toggleFormsAndButton);
+            });
+
+            // Initial call to set visibility based on default checked radio
+            toggleFormsAndButton();
+        });
+    </script>
 </body>
 </html>

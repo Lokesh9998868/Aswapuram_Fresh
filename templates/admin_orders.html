@@ -1,56 +1,63 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aswapuram Fresh - Admin Orders</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>body { font-family: 'Inter', sans-serif; }</style>
-</head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-4">
-    <div class="container mx-auto bg-white rounded-lg shadow-xl p-6 md:p-8 max-w-4xl w-full">
-        <h1 class="text-3xl font-extrabold text-green-700 mb-6 text-center">Admin Panel - All Orders</h1>
-        <div class="flex justify-end mb-4">
-            <a href="{{ url_for('logout') }}" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">Logout</a>
-        </div>
+{% extends "admin_base.html" %}
 
-        {# This is the loop that the error often points to if 'orders' is not iterable #}
-        {% if orders %}
-            <div class="space-y-6">
-                {% for order in orders %}
-                    <div class="bg-gray-50 rounded-xl shadow-md p-5 border border-gray-200">
-                        <div class="flex justify-between items-center mb-3">
-                            <h2 class="text-xl font-bold text-gray-800">Order ID: {{ order.id }}</h2>
-                            <span class="px-3 py-1 rounded-full text-sm font-semibold {{ 'bg-yellow-200 text-yellow-800' if order.status == 'Pending' else 'bg-green-200 text-green-800' }}">
-                                {{ order.status }}
-                            </span>
-                        </div>
-                        <p class="text-gray-700 mb-2"><strong>Customer:</strong> {{ order.user_name }} ({{ order.user_email }})</p>
-                        <p class="text-gray-700 mb-2"><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
-                        <p class="text-gray-700 mb-2"><strong>Total Amount:</strong> ₹{{ "%.2f" | format(order.total_amount) }}</p>
-                        <p class="text-gray-700 mb-4"><strong>Date:</strong> {{ order.date }}</p>
+{% block title %}Admin Orders{% endblock %}
 
-                        <h3 class="text-lg font-semibold text-gray-800 mb-2">Items:</h3>
-                        {# This is the nested loop that is also a common culprit #}
-                        <ul class="list-disc list-inside space-y-1 pl-4">
-                            {% for item in order.items %}
-                                <li class="text-gray-600">{{ item.name }} x {{ item.quantity }} (₹{{ "%.2f" | format(item.price) }} / {{ item.unit }})</li>
-                            {% endfor %}
-                        </ul>
+{% block content %}
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Admin Panel - All Orders</h2>
 
-                        {% if order.status == 'Pending' %}
-                            <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="post" class="mt-4">
-                                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
-                                    Mark as Delivered
-                                </button>
-                            </form>
-                        {% endif %}
-                    </div>
+    {# --- FLASH MESSAGES START --- #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="list-none p-0 mb-4">
+                {% for category, message in messages %}
+                    <li class="p-3 mb-2 rounded-md {% if category == 'success' %}bg-green-100 text-green-700{% elif category == 'danger' %}bg-red-100 text-red-700{% elif category == 'warning' %}bg-yellow-100 text-yellow-700{% else %}bg-blue-100 text-blue-700{% endif %} border border-{{ category }}-400">
+                        {{ message }}
+                    </li>
                 {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-center text-gray-600">No orders received yet.</p>
+            </ul>
         {% endif %}
-    </div>
-</body>
-</html>
+    {% endwith %}
+    {# --- FLASH MESSAGES END --- #}
+
+    {% if orders %}
+        <div class="space-y-6">
+            {% for order in orders %}
+                <div class="bg-gray-50 rounded-xl shadow-md p-5 border border-gray-200">
+                    <div class="flex justify-between items-center mb-3">
+                        <h2 class="text-xl font-bold text-gray-800">Order ID: {{ order.id }}</h2>
+                        <span class="px-3 py-1 rounded-full text-sm font-semibold {{ 'bg-yellow-200 text-yellow-800' if order.status == 'Pending' else 'bg-green-200 text-green-800' }}">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    {# Correctly accessing user data via the 'customer' relationship defined in Order model #}
+                    <p class="text-gray-700 mb-2"><strong>Customer:</strong> {{ order.customer.name }} ({{ order.customer.email }})</p>
+                    <p class="text-gray-700 mb-2"><strong>Delivery Address:</strong> {{ order.delivery_address }}</p>
+                    <p class="text-gray-700 mb-2"><strong>Total Amount:</strong> ₹{{ "%.2f" | format(order.total_amount) }}</p>
+                    <p class="text-gray-700 mb-4"><strong>Date:</strong> {{ order.date.strftime('%Y-%m-%d %H:%M') }}</p>
+                    <p class="text-gray-700 mb-4"><strong>Payment Method:</strong> {{ order.payment_method | capitalize }}</p>
+
+                    {# ADDED SECTION: Display Ordered Items #}
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2 border-t pt-4 mt-4">Ordered Items:</h3>
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        {% for item in order.items %}
+                            <li class="text-gray-600">
+                                {{ item.product_name }} x {{ item.quantity }} (₹{{ "%.2f" | format(item.product_price_at_order) }} / {{ item.product_unit }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    {# END OF ADDED SECTION #}
+
+                    {% if order.status == 'Pending' %}
+                        <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="post" class="mt-4">
+                            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md">
+                                Mark as Delivered
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600">No orders received yet.</p>
+    {% endif %}
+{% endblock %}

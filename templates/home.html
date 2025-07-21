@@ -28,6 +28,7 @@
                                 {{ cart_item_count }}
                             </span>
                         {% endif %}
+                        <a href="{{ url_for('my_orders') }}" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow-md mr-2">My Orders</a>
                     </a>
                     {% if session.is_admin %}
                         <a href="{{ url_for('admin_orders') }}" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition duration-150 ease-in-out">Admin Orders</a>
