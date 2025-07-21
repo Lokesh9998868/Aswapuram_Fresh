@@ -26,7 +26,7 @@ app = Flask(__name__)
 # Make sure your PostgreSQL server is running and the database 'aswapuram_fresh_db' exists
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')# Corrected: Removed misleading MySQL comment
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.secret_key = os.environ.get(SECRET_KEY, 'default_secret_key_for_dev')
+app.secret_key = os.environ.get('SECRET_KEY', 'default_secret_key_for_dev')
 import os
 
 # Initialize Flask app
