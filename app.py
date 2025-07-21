@@ -68,8 +68,6 @@ login_manager.login_message_category = 'warning'
 
 # --- Database Models ---
 class User(db.Model, UserMixin):
-# --- Database Models ---
-class User(db.Model):
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
