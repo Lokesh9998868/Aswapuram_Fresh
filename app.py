@@ -18,8 +18,6 @@ from flask import Flask
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-port = int(os.environ.get("PORT", 5000))
-app.run(host='0.0.0.0', port=port)
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -763,4 +761,9 @@ def initiate_upi_payment():
 # --- To run the Flask app ---
 if __name__ == '__main__':
     app.run(debug=True)
+    
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
     
