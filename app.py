@@ -12,11 +12,14 @@ import re # For UPI ID validation
 from urllib.parse import quote_plus
 from uuid import uuid4
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask import Flask
 
 
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
+port = int(os.environ.get("PORT", 5000))
+app.run(host='0.0.0.0', port=port)
 
 # Initialize Flask app
 app = Flask(__name__)
