@@ -13,6 +13,8 @@ DateTime==5.3
 Django==5.2.12
 Flask==3.0.3
 Flask-SQLAlchemy==3.1.1
+gunicorn
+setuptools
 greenlet==3.2.3
 idna==3.4
 itsdangerous==2.2.0
