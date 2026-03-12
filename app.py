@@ -413,7 +413,6 @@ def update_order_status(order_id):
 def init_db_command():
     """Clear existing data and create new tables."""
     with app.app_context():
-        db.drop_all()
         db.create_all()
 
         if Product.query.count() == 0:
