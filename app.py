@@ -10,7 +10,7 @@ app = Flask(__name__)
 # --- Database Configuration for PostgreSQL ---
 # IMPORTANT: Replace 'lokesh9' with your actual password if it's different
 # Make sure your PostgreSQL server is running and the database 'aswapuram_fresh_db' exists
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://flaskuser:lokesh9@localhost:5432/aswapuram_fresh_db' # Corrected: Removed misleading MySQL comment
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:lokesh123@localhost:5432/freshdb' # Corrected: Removed misleading MySQL comment
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'lokesh123'
 
@@ -413,6 +413,7 @@ def update_order_status(order_id):
 def init_db_command():
     """Clear existing data and create new tables."""
     with app.app_context():
+        db.drop_all()
         db.create_all()
 
         if Product.query.count() == 0:
