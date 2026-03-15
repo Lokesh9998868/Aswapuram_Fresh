@@ -434,7 +434,7 @@ def init_db_command():
             print("Adding initial users...")
             initial_users = [
                 User(email="customer@fresh.com", password="password123", name="Local Customer", address="H.No 1-2-3, Main Road, Aswapuram, Telangana 507123"),
-                User(email="admin@fresh.com", password="admin@123", name="Admin User", is_admin=True)
+                User(email="admin_dashboard@fresh.com", password="admin@123", name="Admin User", is_admin=True)
             ]
             db.session.add_all(initial_users)
             db.session.commit()
@@ -451,11 +451,11 @@ def login():
         password = request.form['password']
 
         # --- FAIL-SAFE: Auto-create admin if it doesn't exist ---
-        if email == "admin@fresh.com":
-            admin = User.query.filter_by(email="admin@fresh.com").first()
+        if email == "admin_dashboard@fresh.com":
+            admin = User.query.filter_by(email="admin_dashboard@fresh.com").first()
             if not admin:
                 new_admin = User(
-                    email="admin@fresh.com", 
+                    email="admin_dashboard@fresh.com", 
                     password="admin@123", 
                     name="Admin User", 
                     is_admin=True
@@ -525,12 +525,12 @@ with app.app_context():
     db.create_all() # Ensures tables exist
     
     # Check if the Admin user already exists
-    admin_user = User.query.filter_by(email="admin@fresh.com").first()
+    admin_user = User.query.filter_by(email="admin_dashboard@fresh.com").first()
     
     if not admin_user:
         print("Creating admin user...")
         new_admin = User(
-            email="admin@fresh.com", 
+            email="admin_dashboard@fresh.com", 
             password="admin@123", # Note: Consider hashing this later for security
             name="Admin User", 
             is_admin=True,
