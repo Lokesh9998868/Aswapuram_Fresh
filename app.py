@@ -3,6 +3,7 @@ import uuid # For generating unique IDs for products and orders
 from flask_sqlalchemy import SQLAlchemy # Corrected: SQLAlchemy (no extra 'A')
 from datetime import datetime # to get current date for orders
 from functools import wraps # For creating decorators
+import os
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -10,7 +11,7 @@ app = Flask(__name__)
 # --- Database Configuration for PostgreSQL ---
 # IMPORTANT: Replace 'lokesh9' with your actual password if it's different
 # Make sure your PostgreSQL server is running and the database 'aswapuram_fresh_db' exists
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:lokesh123@localhost:5432/freshdb' # Corrected: Removed misleading MySQL comment
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'freshdb_ggtk_user://freshdb_ggtk_user:6nwh9rvgDUT3fLdY3jZo3N1HkH9EDrpx@dpg-d6r5l0v5r7bs738r0qq0-a.oregon-postgres.render.com/freshdb_ggtk:6nwh9rvgDUT3fLdY3jZo3N1HkH9EDrpx@localhost:5432/freshdb_ggtk') # Corrected: Removed misleading MySQL comment
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = 'lokesh123'
 
