@@ -469,6 +469,20 @@ def my_orders():
 # ... (keep all your existing routes and code below this)
 
 # --- To run the Flask app ---
+# Add this block before your final 'if __name__ == "__main__":'
+with app.app_context():
+    db.create_all()
+    # Optional: If you want to add the initial products automatically too:
+    if Product.query.count() == 0:
+        initial_products = [
+            Product(name="Fresh Tomatoes", price=45.00, unit="kg", image="tomato.png"),
+            Product(name="Organic Spinach", price=30.00, unit="bunch", image="spinach.png"),
+            Product(name="Farm Fresh Potatoes", price=25.00, unit="kg", image="potato.png")
+        ]
+        db.session.add_all(initial_products)
+        db.session.commit()
+        
+
 if __name__ == '__main__':
     app.run(debug=True)
     
