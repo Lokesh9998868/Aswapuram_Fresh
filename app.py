@@ -441,6 +441,44 @@ def init_db_command():
             print("Initial users added.")
     print("Initialized the database.")
     
+    
+    
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    error = None
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+
+        # --- FAIL-SAFE: Auto-create admin if it doesn't exist ---
+        if email == "admin@fresh.com":
+            admin = User.query.filter_by(email="admin@fresh.com").first()
+            if not admin:
+                new_admin = User(
+                    email="admin@fresh.com", 
+                    password="admin@123", 
+                    name="Admin User", 
+                    is_admin=True
+                )
+                db.session.add(new_admin)
+                db.session.commit()
+        # -------------------------------------------------------
+
+        user_data = User.query.filter_by(email=email).first()
+
+        if user_data and user_data.password == password:
+            session['logged_in'] = True
+            session['email'] = user_data.email
+            session['username'] = user_data.name
+            session['is_admin'] = user_data.is_admin
+            
+            if session['is_admin']:
+                return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('homepage'))
+        else:
+            error = 'Invalid Credentials. Please try again.'
+
+    return render_template('login.html', error=error)
 # app.py
 
 # ... (keep all your existing imports and code above this)
