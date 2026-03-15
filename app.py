@@ -92,36 +92,36 @@ def homepage():
     cart_item_count = session.get('cart_item_count', 0)
     return render_template('home.html', products=all_products, username=username, cart_item_count=cart_item_count)
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    error = None
-    email_attempt = ''
+#@app.route('/login', methods=['GET', 'POST'])
+#def login():
+#    error = None
+#    email_attempt = ''
 
-    if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        email_attempt = email
+ #   if request.method == 'POST':
+ #       email = request.form['email']
+  #      password = request.form['password']
+   #     email_attempt = email
 
-        user_data = User.query.filter_by(email=email).first() # CORRECTED: 'User' (singular)
+    #    user_data = User.query.filter_by(email=email).first() # CORRECTED: 'User' (singular)
+#
+ #       # CORRECTED: Access password via .password attribute (not dictionary key)
+  #      if user_data and user_data.password == password:
+   #         session['logged_in'] = True
+    #        session['email'] = user_data.email
+     #       session['username'] = user_data.name
+      #      session['is_admin'] = user_data.is_admin
+#
+ #           next_page = session.pop('redirect_after_login', None)
+  #          if next_page:
+   #             return redirect(next_page)
+    #        elif session['is_admin']:
+     #           return redirect(url_for('admin_dashboard'))
+      #      else:
+       #         return redirect(url_for('homepage'))
+        #else:
+         #   error = 'Invalid Credentials. Please try again.'
 
-        # CORRECTED: Access password via .password attribute (not dictionary key)
-        if user_data and user_data.password == password:
-            session['logged_in'] = True
-            session['email'] = user_data.email
-            session['username'] = user_data.name
-            session['is_admin'] = user_data.is_admin
-
-            next_page = session.pop('redirect_after_login', None)
-            if next_page:
-                return redirect(next_page)
-            elif session['is_admin']:
-                return redirect(url_for('admin_dashboard'))
-            else:
-                return redirect(url_for('homepage'))
-        else:
-            error = 'Invalid Credentials. Please try again.'
-
-    return render_template('login.html', error=error, email=email_attempt)
+   # return render_template('login.html', error=error, email=email_attempt)
 
 # ADDED: New route for user registration
 @app.route('/register', methods=['GET', 'POST'])
@@ -415,7 +415,7 @@ def init_db_command():
     """Clear existing data and create new tables."""
     with app.app_context():
         db.drop_all()
-        db.create_all()
+        db.create_all()admin@frp
 
         if Product.query.count() == 0:
             print("Adding initial products...")
